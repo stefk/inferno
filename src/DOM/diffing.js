@@ -3,64 +3,45 @@ import { replaceNode, SVGNamespace, MathNamespace } from './utils';
 import { patchNonKeyedChildren, patchKeyedChildren, patchAttribute, patchComponent, patchStyle } from './patching';
 import { mountChildren, mountNode } from './mounting';
 
+function diffValueOnNode(type, lastValue, nextValue, dom, namespace, lifecycle, context) {
+	switch (type) {
+		case 0x0001: // single child
+			diffNodes(lastValue, nextValue, dom, namespace, lifecycle, context);
+			return;
+		case 0x0002: // many children non keyed
+			patchNonKeyedChildren(lastValue, nextValue, dom, namespace, lifecycle, context, null);
+			return;
+		case 0x0003: // text child
+			dom.firstChild.nodeValue = nextValue;
+			return;
+		case 0x0004: // className prop
+			if (nextValue) {
+				dom.className = nextValue;
+			}
+			return;
+	}
+}
+
 export function diffNodes(lastNode, nextNode, parentDom, namespace, lifecycle, context, staticCheck) {
 	if (nextNode === false || nextNode === null) {
 		return;
 	}
-	if (isStringOrNumber(lastNode)) {
-		if (isStringOrNumber(nextNode)) {
-			parentDom.firstChild.nodeValue = nextNode;
-		}
-		return;
-	}
-	const nextTag = nextNode.tag || (staticCheck && nextNode.static ? nextNode.static.tag : null);
-	const lastTag = lastNode.tag || (staticCheck && lastNode.static ? lastNode.static.tag : null);
-
-	if (lastNode.events && lastNode.events.willUpdate) {
-		lastNode.events.willUpdate(lastNode.dom);
-	}
-	namespace = namespace || nextTag === 'svg' ? SVGNamespace : nextTag === 'math' ? MathNamespace : null;
-
-	if (lastTag !== nextTag) {
-		if (isFunction(lastTag) && !isFunction(nextTag)) {
-			if (isStatefulComponent(lastTag)) {
-				diffNodes(lastNode.instance._lastNode, nextNode, parentDom, namespace, lifecycle, context, true);
-			} else {
-				diffNodes(lastNode.instance, nextNode, parentDom, namespace, lifecycle, context, true);
-			}
-		} else {
-			replaceNode(lastNode, nextNode, parentDom, namespace, lifecycle, context);
-		}
-		return;
-	}
-	if (isFunction(lastTag) && isFunction(nextTag)) {
-		nextNode.instance = lastNode.instance;
-		nextNode.dom = lastNode.dom;
-		patchComponent(nextNode, nextNode.tag, nextNode.instance, lastNode.attrs, nextNode.attrs, nextNode.events, nextNode.children, parentDom, lifecycle, context);
-		return;
-	}
+	const lastTpl = lastNode.tpl;
+	const nextTpl = nextNode.tpl;
 	const dom = lastNode.dom;
 
+
 	nextNode.dom = dom;
-	diffChildren(lastNode, nextNode, dom, namespace, lifecycle, context, staticCheck);
-	const nextClassName = nextNode.className;
-	const nextStyle = nextNode.style;
-
-	if (lastNode.className !== nextClassName) {
-		if (isNullOrUndefined(nextClassName)) {
-			dom.removeAttribute('class');
-		} else {
-			dom.className = nextClassName;
+	if (lastTpl === nextTpl) {
+		if (nextNode.v0 !== lastNode.v0) {
+			diffValueOnNode(nextTpl.v0, lastNode.v0, nextNode.v0, dom, namespace, lifecycle, context);
 		}
-	}
-	if (lastNode.style !== nextStyle) {
-		patchStyle(lastNode.style, nextStyle, dom);
-	}
-	diffAttributes(lastNode, nextNode, dom);
-	diffEvents(lastNode, nextNode, dom);
-
-	if (nextNode.events && nextNode.events.didUpdate) {
-		nextNode.events.didUpdate(dom);
+		if (nextNode.v1 !== lastNode.v1) {
+			diffValueOnNode(nextTpl.v1, lastNode.v1, nextNode.v1, dom, namespace, lifecycle, context);
+		}
+		if (nextNode.v2 !== lastNode.v2) {
+			diffValueOnNode(nextTpl.v2, lastNode.v2, nextNode.v2, dom, namespace, lifecycle, context);
+		}
 	}
 }
 

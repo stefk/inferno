@@ -13,161 +13,172 @@
 
 	var appTemplate1 = {
 		dom: Inferno.staticCompiler.createElement('table', { className: 'table table-striped latest-data' }),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'table',
-		className: 'table table-striped latest-data'
+		v0: 0x0001 // single child
 	};
 
 	var appTemplate2 = {
 		dom: Inferno.staticCompiler.createElement('tbody'),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'tbody'
+		v0: 0x0002 // list of children
 	};
 
 	var dbTemplate1 = {
 		dom: Inferno.staticCompiler.createElement('tr'),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'tr'
+		v0: 0x0002 // list of children
 	};
 
 	var dbTemplate2 = {
 		dom: Inferno.staticCompiler.createElement('td', { className: 'dbname' }),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'td',
-		className: 'dbname'
+		v0: 0x0003 // text child
 	};
 
 	var dbTemplate3 = {
 		dom: Inferno.staticCompiler.createElement('td', { className: 'query-count' }),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'td',
-		className: 'query-count'
+		v0: 0x0001 // single child
 	};
 
 	var dbTemplate4 = {
 		dom: Inferno.staticCompiler.createElement('span'),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'span'
+		v0: 0x0003, // text child
+		v1: 0x0004 // class prop
 	};
 
 	var queryTemplate1 = {
 		dom: Inferno.staticCompiler.createElement('td'),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'td'
+		v0: 0x0002, // list of children
+		v1: 0x0004 // class prop
 	};
 
 	var queryTemplate2 = {
 		dom: Inferno.staticCompiler.createElement('span', { className: 'foo' }),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'span',
-		className: 'foo'
+		v0: 0x0003 // text child
 	};
 
 	var queryTemplate3 = {
 		dom: Inferno.staticCompiler.createElement('div', { className: 'popover left' }),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'div',
-		className: 'popover left'
+		v0: 0x0002 // list of children
 	};
 
 	var queryTemplate4 = {
 		dom: Inferno.staticCompiler.createElement('div', { className: 'popover-content' }),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
 		},
-		tag: 'div',
-		className: 'popover-content'
+		v0: 0x0003 // text child
 	};
 
 	var queryTemplate5 = {
 		dom: Inferno.staticCompiler.createElement('div', { className: 'arrow' }),
-		static: {
+		pools: {
 			keyed: [],
 			nonKeyed: []
-		},
-		tag: 'div',
-		className: 'arrow'
+		}
 	};
 
 	function createQuery(query) {
 		return {
 			dom: null,
-			static: queryTemplate1,
-			children: [
+			tpl: queryTemplate1,
+			v0: [
 				{
 					dom: null,
-					static: queryTemplate2,
-					children: query.formatElapsed
+					tpl: queryTemplate2,
+					v0: query.formatElapsed,
+					v1: null,
+					v2: null
 				},
 				{
 					dom: null,
-					static: queryTemplate3,
-					children: [
+					tpl: queryTemplate3,
+					v0: [
 						{
 							dom: null,
-							static: queryTemplate4,
-							children: query.query
+							tpl: queryTemplate4,
+							v0: query.query,
+							v1: null,
+							v2: null
 						},
 						{
 							dom: null,
-							static: queryTemplate5
+							tpl: queryTemplate5,
+							v0: null,
+							v1: null,
+							v2: null
 						}
-					]
+					],
+					v1: null,
+					v2: null
 				}
 			],
-			className: 'Query ' + query.elapsedClassName
+			v1: query.elapsedClassName,
+			v2: null
 		};
 	}
 
 	function createDatabase(db) {
 		return {
 			dom: null,
-			static: dbTemplate1,
-			children: [
+			tpl: dbTemplate1,
+			v0: [
 				{
 					dom: null,
-					static: dbTemplate2,
-					children: db.dbname
+					tpl: dbTemplate2,
+					v0: db.dbname,
+					v1: null,
+					v2: null
 				},
 				{
 					dom: null,
-					static: dbTemplate3,
-					children: {
+					tpl: dbTemplate3,
+					v0: {
 						dom: null,
-						static: dbTemplate4,
-						children: db.lastSample.nbQueries,
-						className: db.lastSample.countClassName
-					}
+						tpl: dbTemplate4,
+						v0: db.lastSample.nbQueries,
+						v1: db.lastSample.countClassName,
+						v2: null
+					},
+					v1: null,
+					v2: null
 				}
-			].concat(map(createQuery, db.lastSample.topFiveQueries))
+			].concat(map(createQuery, db.lastSample.topFiveQueries)),
+			v1: null,
+			v2: null
 		};
 	}
 
@@ -176,12 +187,16 @@
 		Monitoring.renderRate.ping();
 		InfernoDOM.render({
 			dom: null,
-			static: appTemplate1,
-			children: {
+			tpl: appTemplate1,
+			v0: {
 				dom: null,
-				static: appTemplate2,
-				children: map(createDatabase, dbs)
-			}
+				tpl: appTemplate2,
+				v0: map(createDatabase, dbs),
+				v1: null,
+				v2: null
+			},
+			v1: null,
+			v2: null
 		}, elem);
 		setTimeout(render, ENV.timeout);
 	}

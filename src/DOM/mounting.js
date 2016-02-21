@@ -89,88 +89,55 @@ function mountEvents(events, allEvents, dom) {
 	}
 }
 
-export function mountNode(node, parentDom, namespace, lifecycle, context) {
-	let dom;
-
-	if (isNullOrUndefined(node) || isArray(node)) {
-		const dom = document.createTextNode('');
-
-		if (parentDom !== null) {
-			parentDom.appendChild(dom);
-		}
-		return dom;
-	}
-	if (isStringOrNumber(node)) {
-		const dom = document.createTextNode(node);
-
-		if (parentDom !== null) {
-			parentDom.appendChild(dom);
-		}
-		return dom;
-	}
-	if (recyclingEnabled) {
-		dom = recycle(node, lifecycle, context);
-		if (dom) {
-			if (parentDom) {
-				parentDom.appendChild(dom);
-			}
-			return dom;
-		}
-	}
-	const tag = node.tag;
-
-	if (isFunction(tag)) {
-		return mountComponent(node, tag, node.attrs, node.events, node.children, parentDom, lifecycle, context);
-	}
-	if (tag !== null && !isString(tag)) {
-		throw Error('Inferno Error: Expected function or string for element tag type');
-	}
-	namespace = namespace || tag === 'svg' ? SVGNamespace : tag === 'math' ? MathNamespace : null;
-	if (node.static && node.static.dom) {
-		dom = node.static.dom.cloneNode(true);
+function mountChild(value, parentDom, namespace, lifecycle, context) {
+	if (isStringOrNumber(value)) {
+		appendText(value, parentDom, true);
 	} else {
-		dom = createElement(tag, namespace);
+		mountNode(value, parentDom, namespace, lifecycle, context);
 	}
-	const children = node.children;
-	const attrs = node.attrs;
-	const events = node.events;
-	const className = node.className;
-	const style = node.style;
+}
 
-	if (events) {
-		const allEvents = Object.keys(events);
-		let eventsCount = allEvents.length;
+function mountValueOnNode(type, value, dom, namespace, lifecycle, context) {
+	switch (type) {
+		case 0x0001: // single child
+			mountChild(value, dom, namespace, lifecycle, context);
+			return;
+		case 0x0002: // many children
+			for (let i = 0; i < value.length; i++) {
+				const child = value[i];
 
-		if (events.click) {
-			handleEvent('click', dom, events.click);
-			eventsCount--;
-		}
-		if (events.created) {
-			events.created(dom);
-			eventsCount--;
-		}
-		if (events.attached) {
-			lifecycle.addListener(() => {
-				events.attached(dom);
-			});
-			eventsCount--;
-		}
-		if (eventsCount > 0) {
-			mountEvents(events, allEvents, dom);
-		}
+				mountChild(child, dom, namespace, lifecycle, context);
+			}
+			return;
+		case 0x0003: // text child
+			if (value === '') {
+				dom.appendChild(document.createTextNode(''));
+			} else {
+				dom.textContent = value;
+			}
+			return;
+		case 0x0004: // className prop
+			if (value) {
+				dom.className = value;
+			}
+			return;
 	}
-	if (!isNullOrUndefined(children)) {
-		mountChildren(children, dom, namespace, lifecycle, context);
+}
+
+export function mountNode(node, parentDom, namespace, lifecycle, context) {
+	const tpl = node.tpl;
+	const dom = tpl.dom.cloneNode(true);
+
+	if (tpl.v0 !== undefined) {
+		mountValueOnNode(tpl.v0, node.v0, dom, namespace, lifecycle, context);
 	}
-	if (attrs) {
-		mountAttributes(attrs, dom);
+	if (tpl.v1 !== undefined) {
+		mountValueOnNode(tpl.v1, node.v1, dom, namespace, lifecycle, context);
 	}
-	if (!isNullOrUndefined(className)) {
-		dom.className = className;
+	if (tpl.v2 !== undefined) {
+		mountValueOnNode(tpl.v2, node.v2, dom, namespace, lifecycle, context);
 	}
-	if (!isNullOrUndefined(style)) {
-		patchStyle(null, style, dom);
-	}
+
 	node.dom = dom;
 	if (parentDom !== null) {
 		parentDom.appendChild(dom);

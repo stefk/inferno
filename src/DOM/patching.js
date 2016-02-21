@@ -13,7 +13,7 @@ export function patchNode(lastNode, nextNode, parentDom, namespace, lifecycle, c
 		remove(lastNode, parentDom);
 		return;
 	}
-	diffNodes(lastNode, nextNode, parentDom, namespace, lifecycle, context, lastNode.static !== null && nextNode.static !== null);
+	diffNodes(lastNode, nextNode, parentDom, namespace, lifecycle, context, false);
 }
 
 export function patchStyle(lastAttrValue, nextAttrValue, dom) {
@@ -124,67 +124,80 @@ export function patchComponent(lastNode, Component, instance, lastProps, nextPro
 }
 
 export function patchNonKeyedChildren(lastChildren, nextChildren, dom, namespace, lifecycle, context, nextDom) {
-	let lastChildrenLength = lastChildren.length;
 	let nextChildrenLength = nextChildren.length;
 
-	if (lastChildrenLength > nextChildrenLength) {
-		let lastDomNode;
-		while (lastChildrenLength !== nextChildrenLength) {
-			const lastChild = lastChildren[lastChildrenLength - 1];
-
-			if (!isNullOrUndefined(lastChild)) {
-				dom.removeChild((lastDomNode = lastChild.dom)
-					|| (lastDomNode && (lastDomNode = lastDomNode.previousSibling))
-					|| (lastDomNode = dom.lastChild)
-				);
-			}
-			lastChildrenLength--;
-		}
-	} else if (lastChildrenLength < nextChildrenLength) {
-		let counter = 0;
-		while (lastChildrenLength !== nextChildrenLength) {
-			const nextChild = nextChildren[lastChildrenLength + counter];
-
-			if (isNullOrUndefined(nextChild)) {
-				//debugger;
-				// TODO implement
-			} else {
-				const node = mountNode(nextChild, null, namespace, namespace, lifecycle, context);
-				dom.appendChild(node);
-			}
-			nextChildrenLength--;
-			counter++;
-		}
-	}
 	for (let i = 0; i < nextChildrenLength; i++) {
 		const lastChild = lastChildren[i];
 		const nextChild = nextChildren[i];
 
 		if (lastChild !== nextChild) {
-			if (isNullOrUndefined(nextChild)) {
-				if (!isNullOrUndefined(lastChild)) {
-					dom.childNodes[i].textContent = '';
-					// TODO implement remove child
-				}
-			} else {
-				if (isNullOrUndefined(lastChild)) {
-					if (isStringOrNumber(nextChild)) {
-						dom.childNodes[i].textContent = nextChild;
-					} else {
-						const node = mountNode(nextChild, null, namespace, namespace, lifecycle, context);
-						dom.replaceChild(node, dom.childNodes[i]);
-					}
-				} else {
-					if (isStringOrNumber(nextChild)) {
-						dom.childNodes[i].textContent = nextChild;
-					} else {
-						patchNode(lastChild, nextChild, dom, namespace, lifecycle, context);
-					}
-				}
-			}
+			patchNode(lastChild, nextChild, dom, namespace, lifecycle, context);
 		}
 	}
 }
+
+//export function patchNonKeyedChildren(lastChildren, nextChildren, dom, namespace, lifecycle, context, nextDom) {
+//	let lastChildrenLength = lastChildren.length;
+//	let nextChildrenLength = nextChildren.length;
+//
+//	if (lastChildrenLength > nextChildrenLength) {
+//		let lastDomNode;
+//		while (lastChildrenLength !== nextChildrenLength) {
+//			const lastChild = lastChildren[lastChildrenLength - 1];
+//
+//			if (!isNullOrUndefined(lastChild)) {
+//				dom.removeChild((lastDomNode = lastChild.dom)
+//					|| (lastDomNode && (lastDomNode = lastDomNode.previousSibling))
+//					|| (lastDomNode = dom.lastChild)
+//				);
+//			}
+//			lastChildrenLength--;
+//		}
+//	} else if (lastChildrenLength < nextChildrenLength) {
+//		let counter = 0;
+//		while (lastChildrenLength !== nextChildrenLength) {
+//			const nextChild = nextChildren[lastChildrenLength + counter];
+//
+//			if (isNullOrUndefined(nextChild)) {
+//				//debugger;
+//				// TODO implement
+//			} else {
+//				const node = mountNode(nextChild, null, namespace, namespace, lifecycle, context);
+//				dom.appendChild(node);
+//			}
+//			nextChildrenLength--;
+//			counter++;
+//		}
+//	}
+//	for (let i = 0; i < nextChildrenLength; i++) {
+//		const lastChild = lastChildren[i];
+//		const nextChild = nextChildren[i];
+//
+//		if (lastChild !== nextChild) {
+//			if (isNullOrUndefined(nextChild)) {
+//				if (!isNullOrUndefined(lastChild)) {
+//					dom.childNodes[i].textContent = '';
+//					// TODO implement remove child
+//				}
+//			} else {
+//				if (isNullOrUndefined(lastChild)) {
+//					if (isStringOrNumber(nextChild)) {
+//						dom.childNodes[i].textContent = nextChild;
+//					} else {
+//						const node = mountNode(nextChild, null, namespace, namespace, lifecycle, context);
+//						dom.replaceChild(node, dom.childNodes[i]);
+//					}
+//				} else {
+//					if (isStringOrNumber(nextChild)) {
+//						dom.childNodes[i].textContent = nextChild;
+//					} else {
+//						patchNode(lastChild, nextChild, dom, namespace, lifecycle, context);
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
 
 export function patchKeyedChildren(lastChildren, nextChildren, dom, namespace, lifecycle, context, nextDom) {
 	let stop = false;
