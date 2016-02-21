@@ -1,4 +1,4 @@
-import { isNullOrUndefined, isAttrAnEvent, isString, isNumber, addChildrenToProps, isStatefulComponent, isStringOrNumber } from '../core/utils';
+import { isNullOrUndefined, isAttrAnEvent, isString, isNumber, addChildrenToProps, isStatefulComponent, isStringOrNumber, isArray } from '../core/utils';
 import { diffNodes } from './diffing';
 import { mountNode } from './mounting';
 import { insertOrAppend, remove } from './utils';
@@ -131,7 +131,16 @@ export function patchNonKeyedChildren(lastChildren, nextChildren, dom, namespace
 		const nextChild = nextChildren[i];
 
 		if (lastChild !== nextChild) {
-			patchNode(lastChild, nextChild, dom, namespace, lifecycle, context);
+			if (isArray(nextChild)) {
+				for (let x = 0; x < nextChild.length; x++) {
+					const subLastChild = lastChild[x];
+					const subNextChild = nextChild[x];
+
+					patchNode(subLastChild, subNextChild, dom, namespace, lifecycle, context);
+				}
+			} else {
+				patchNode(lastChild, nextChild, dom, namespace, lifecycle, context);
+			}
 		}
 	}
 }

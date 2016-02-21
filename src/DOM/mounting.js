@@ -93,7 +93,15 @@ function mountChild(value, parentDom, namespace, lifecycle, context) {
 	if (isStringOrNumber(value)) {
 		appendText(value, parentDom, true);
 	} else {
-		mountNode(value, parentDom, namespace, lifecycle, context);
+		if (isArray(value)) {
+			for (let i = 0; i < value.length; i++) {
+				const child = value[i];
+
+				mountChild(child, parentDom, namespace, lifecycle, context);
+			}
+		} else {
+			mountNode(value, parentDom, namespace, lifecycle, context);
+		}
 	}
 }
 

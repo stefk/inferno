@@ -170,7 +170,16 @@
 			var nextChild = nextChildren[i];
 
 			if (lastChild !== nextChild) {
-				patchNode(lastChild, nextChild, dom, namespace, lifecycle, context);
+				if (isArray(nextChild)) {
+					for (var x = 0; x < nextChild.length; x++) {
+						var subLastChild = lastChild[x];
+						var subNextChild = nextChild[x];
+
+						patchNode(subLastChild, subNextChild, dom, namespace, lifecycle, context);
+					}
+				} else {
+					patchNode(lastChild, nextChild, dom, namespace, lifecycle, context);
+				}
 			}
 		}
 	}
@@ -243,7 +252,15 @@
 		if (isStringOrNumber(value)) {
 			appendText(value, parentDom, true);
 		} else {
-			mountNode(value, parentDom, namespace, lifecycle, context);
+			if (isArray(value)) {
+				for (var i = 0; i < value.length; i++) {
+					var child = value[i];
+
+					mountChild(child, parentDom, namespace, lifecycle, context);
+				}
+			} else {
+				mountNode(value, parentDom, namespace, lifecycle, context);
+			}
 		}
 	}
 

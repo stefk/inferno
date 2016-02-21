@@ -175,8 +175,9 @@
 					},
 					v1: null,
 					v2: null
-				}
-			].concat(map(createQuery, db.lastSample.topFiveQueries)),
+				},
+				map(createQuery, db.lastSample.topFiveQueries)
+			],
 			v1: null,
 			v2: null
 		};
