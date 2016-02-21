@@ -200,7 +200,7 @@
 				return;
 			case 0x0004:
 				// className prop
-				if (nextValue) {
+				if (!isNullOrUndefined(nextValue)) {
 					dom.className = nextValue;
 				}
 				return;
@@ -211,21 +211,18 @@
 		if (nextNode === false || nextNode === null) {
 			return;
 		}
-		var lastTpl = lastNode.tpl;
 		var nextTpl = nextNode.tpl;
 		var dom = lastNode.dom;
 
 		nextNode.dom = dom;
-		if (lastTpl === nextTpl) {
-			if (nextNode.v0 !== lastNode.v0) {
-				diffValueOnNode(nextTpl.v0, lastNode.v0, nextNode.v0, dom, namespace, lifecycle, context);
-			}
-			if (nextNode.v1 !== lastNode.v1) {
-				diffValueOnNode(nextTpl.v1, lastNode.v1, nextNode.v1, dom, namespace, lifecycle, context);
-			}
-			if (nextNode.v2 !== lastNode.v2) {
-				diffValueOnNode(nextTpl.v2, lastNode.v2, nextNode.v2, dom, namespace, lifecycle, context);
-			}
+		if (nextNode.v0 !== lastNode.v0) {
+			diffValueOnNode(nextTpl.v0, lastNode.v0, nextNode.v0, dom, namespace, lifecycle, context);
+		}
+		if (nextNode.v1 !== lastNode.v1) {
+			diffValueOnNode(nextTpl.v1, lastNode.v1, nextNode.v1, dom, namespace, lifecycle, context);
+		}
+		if (nextNode.v2 !== lastNode.v2) {
+			diffValueOnNode(nextTpl.v2, lastNode.v2, nextNode.v2, dom, namespace, lifecycle, context);
 		}
 	}
 

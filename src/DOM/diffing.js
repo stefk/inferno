@@ -26,68 +26,18 @@ export function diffNodes(lastNode, nextNode, parentDom, namespace, lifecycle, c
 	if (nextNode === false || nextNode === null) {
 		return;
 	}
-	const lastTpl = lastNode.tpl;
 	const nextTpl = nextNode.tpl;
 	const dom = lastNode.dom;
 
-
 	nextNode.dom = dom;
-	if (lastTpl === nextTpl) {
-		if (nextNode.v0 !== lastNode.v0) {
-			diffValueOnNode(nextTpl.v0, lastNode.v0, nextNode.v0, dom, namespace, lifecycle, context);
-		}
-		if (nextNode.v1 !== lastNode.v1) {
-			diffValueOnNode(nextTpl.v1, lastNode.v1, nextNode.v1, dom, namespace, lifecycle, context);
-		}
-		if (nextNode.v2 !== lastNode.v2) {
-			diffValueOnNode(nextTpl.v2, lastNode.v2, nextNode.v2, dom, namespace, lifecycle, context);
-		}
+	if (nextNode.v0 !== lastNode.v0) {
+		diffValueOnNode(nextTpl.v0, lastNode.v0, nextNode.v0, dom, namespace, lifecycle, context);
 	}
-}
-
-function diffChildren(lastNode, nextNode, dom, namespace, lifecycle, context, staticCheck) {
-	const nextChildren = nextNode.children;
-	const lastChildren = lastNode.children;
-
-	if (lastChildren !== nextChildren) {
-		if (!isNullOrUndefined(lastChildren)) {
-			if (!isNullOrUndefined(nextChildren)) {
-				if (isArray(lastChildren)) {
-					if (isArray(nextChildren)) {
-						const isKeyed = nextChildren.length && nextChildren[0] && !isNullOrUndefined(nextChildren[0].key)
-							|| lastChildren.length && lastChildren[0] && !isNullOrUndefined(lastChildren[0].key);
-
-						if (!isKeyed) {
-							patchNonKeyedChildren(lastChildren, nextChildren, dom, namespace, lifecycle, context, null);
-						} else {
-							patchKeyedChildren(lastChildren, nextChildren, dom, namespace, lifecycle, context, null);
-						}
-					} else {
-						patchNonKeyedChildren(lastChildren, [nextChildren], dom, namespace, lifecycle, context, null);
-					}
-				} else {
-					if (isArray(nextChildren)) {
-						patchNonKeyedChildren([lastChildren], nextChildren, dom, namespace, lifecycle, context, null);
-					} else if (isStringOrNumber(lastChildren)) {
-						if (isStringOrNumber(nextChildren)) {
-							dom.firstChild.nodeValue = nextChildren;
-						}
-					} else {
-						diffNodes(lastChildren, nextChildren, dom, namespace, lifecycle, context, staticCheck);
-					}
-				}
-			} else {
-				dom.textContent = '';
-			}
-		} else {
-			if (isStringOrNumber(nextChildren)) {
-				dom.textContent = nextChildren;
-			} else if (nextChildren && isArray(nextChildren)) {
-				mountChildren(nextChildren, dom, namespace, lifecycle, context);
-			} else if (nextChildren && typeof nextChildren === 'object') {
-				mountNode(nextChildren, dom, namespace, lifecycle, context);
-			}
-		}
+	if (nextNode.v1 !== lastNode.v1) {
+		diffValueOnNode(nextTpl.v1, lastNode.v1, nextNode.v1, dom, namespace, lifecycle, context);
+	}
+	if (nextNode.v2 !== lastNode.v2) {
+		diffValueOnNode(nextTpl.v2, lastNode.v2, nextNode.v2, dom, namespace, lifecycle, context);
 	}
 }
 

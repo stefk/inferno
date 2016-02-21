@@ -111,94 +111,36 @@
 		}
 	};
 
+	function Element(tpl, v0, v1, v2) {
+		this.dom = null;
+		this.tpl = tpl;
+		this.v0 = v0;
+		this.v1 = v1;
+		this.v2 = v2;
+	}
+
 	function createQuery(query) {
-		return {
-			dom: null,
-			tpl: queryTemplate1,
-			v0: [
-				{
-					dom: null,
-					tpl: queryTemplate2,
-					v0: query.formatElapsed,
-					v1: null,
-					v2: null
-				},
-				{
-					dom: null,
-					tpl: queryTemplate3,
-					v0: [
-						{
-							dom: null,
-							tpl: queryTemplate4,
-							v0: query.query,
-							v1: null,
-							v2: null
-						},
-						{
-							dom: null,
-							tpl: queryTemplate5,
-							v0: null,
-							v1: null,
-							v2: null
-						}
-					],
-					v1: null,
-					v2: null
-				}
-			],
-			v1: query.elapsedClassName,
-			v2: null
-		};
+		return new Element(queryTemplate1, [
+			new Element(queryTemplate2, query.formatElapsed, null, null),
+			new Element(queryTemplate3, [
+				new Element(queryTemplate4, query.query, null, null),
+				new Element(queryTemplate5, null, null, null)
+			])
+		], query.elapsedClassName, null);
 	}
 
 	function createDatabase(db) {
-		return {
-			dom: null,
-			tpl: dbTemplate1,
-			v0: [
-				{
-					dom: null,
-					tpl: dbTemplate2,
-					v0: db.dbname,
-					v1: null,
-					v2: null
-				},
-				{
-					dom: null,
-					tpl: dbTemplate3,
-					v0: {
-						dom: null,
-						tpl: dbTemplate4,
-						v0: db.lastSample.nbQueries,
-						v1: db.lastSample.countClassName,
-						v2: null
-					},
-					v1: null,
-					v2: null
-				},
-				map(createQuery, db.lastSample.topFiveQueries)
-			],
-			v1: null,
-			v2: null
-		};
+		return new Element(dbTemplate1, [
+			new Element(dbTemplate2, db.dbname, null, null),
+			new Element(dbTemplate3, new Element(dbTemplate4, db.lastSample.nbQueries, db.lastSample.countClassName, null), null, null),
+			map(createQuery, db.lastSample.topFiveQueries)
+		], null, null);
 	}
 
 	function render() {
-		var dbs = ENV.generateData(false).toArray();
+		var dbs = ENV.generateData().toArray();
 		Monitoring.renderRate.ping();
-		InfernoDOM.render({
-			dom: null,
-			tpl: appTemplate1,
-			v0: {
-				dom: null,
-				tpl: appTemplate2,
-				v0: map(createDatabase, dbs),
-				v1: null,
-				v2: null
-			},
-			v1: null,
-			v2: null
-		}, elem);
+		InfernoDOM.render(new Element(appTemplate1, new Element(appTemplate2, map(createDatabase, dbs), null, null), null, null), elem);
 		setTimeout(render, ENV.timeout);
 	}
 	render();
