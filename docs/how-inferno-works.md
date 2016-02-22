@@ -40,7 +40,7 @@ Within the `createTemplate` function a "virtual fragment" is created, and a func
 As you are not always going to be saying hello to the entire world, so the arguments of the `createTemplate` callback method gives you Variables.
 
 ```javascript
-const template = Inferno.createTemplate((name) => {
+const template = Inferno.createTemplate(name => {
   return Inferno.TemplateFactory.createElement('p', {
     className: 'basic'
   }, 'Hello ', name, '!');
